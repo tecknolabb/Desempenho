@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TECKNOLAB | Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
+  <style>
+    :root {
+      --bg: #030816;
+      --panel: #07122a;
+      --panel2: #0b1731;
+      --line: #14305f;
+      --cyan: #00e5ff;
+      --cyan2: #00bcd4;
+      --white: #f6fbff;
+      --muted: #9ab2c9;
+      --danger: #ff5d7a;
+      --ok: #46f7b1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, sans-serif;
+      background: radial-gradient(circle at top, #0a1636 0, #030816 45%, #02040b 100%);
+      color: var(--white);
+      min-height: 100vh;
+    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(0, 229, 255, 0.05); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.2); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0, 229, 255, 0.5); }
+
+    .wrap { max-width: 1600px; margin: 0 auto; padding: 18px; }
+    .header {
+      display: flex; gap: 16px; justify-content: space-between; align-items: flex-end;
+      padding: 18px 22px; background: linear-gradient(180deg, rgba(6,16,38,.88), rgba(4,10,24,.65));
+      border: 1px solid rgba(0,229,255,.18); border-radius: 22px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,.03), 0 18px 60px rgba(0,0,0,.35);
+    }
+    .brand h1 { margin: 0; font-family: Orbitron, sans-serif; font-size: clamp(2rem, 4vw, 3.6rem); letter-spacing: .18em; color: var(--cyan); text-shadow: 0 0 16px rgba(0,229,255,.35); }
+    .brand p { margin: .2rem 0 0; color: var(--white); letter-spacing: .22em; font-size: .78rem; opacity: .9; }
+    
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; align-items: center; }
+    select, .btn {
+      background: rgba(9,18,40,.9); color: var(--white); border: 1px solid rgba(0,229,255,.25);
+      border-radius: 14px; padding: 12px 14px; font-weight: 600; outline: none; transition: all 0.2s ease;
+    }
+    select:focus, .btn:hover { border-color: rgba(0,229,255,.7); box-shadow: 0 0 0 3px rgba(0,229,255,.08); }
+    .btn { cursor: pointer; }
+    .btn.active { background: linear-gradient(135deg, rgba(0,229,255,.2), rgba(0,229,255,.05)); color: var(--cyan); box-shadow: inset 0 0 0 1px rgba(0,229,255,.3); }
+    
+    #refreshBtn { background: linear-gradient(135deg, rgba(0,229,255,.15), rgba(0,229,255,.02)); border-color: var(--cyan); color: var(--cyan); display: flex; align-items: center; gap: 6px; }
+
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+    .panel { background: linear-gradient(180deg, rgba(8,18,43,.88), rgba(4,10,24,.92)); border: 1px solid rgba(0,229,255,.14); border-radius: 20px; padding: 16px; box-shadow: 0 12px 50px rgba(0,0,0,.28); min-width: 0; }
+    
+    .grid-kpi { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
+    .kpi { background: linear-gradient(180deg, rgba(11,23,49,.96), rgba(6,14,32,.95)); border: 1px solid rgba(0,229,255,.14); border-radius: 18px; padding: 16px; min-height: 104px; }
+    .kpi .label { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; }
+    .kpi .value { font-size: 1.7rem; font-weight: 800; margin-top: 10px; color: var(--white); }
+    .kpi .sub { font-size: .82rem; color: var(--muted); margin-top: 6px; }
+
+    .grid-main { display: grid; grid-template-columns: 1.2fr .8fr; gap: 12px; align-items: start; }
+    .grid-individual { display: grid; grid-template-columns: .8fr 1.2fr; gap: 12px; align-items: start; }
+    
+    .card { background: linear-gradient(180deg, rgba(11,23,49,.94), rgba(6,14,32,.95)); border: 1px solid rgba(0,229,255,.14); border-radius: 18px; padding: 14px; min-width: 0; }
+    .card h3 { margin: 0 0 12px; font-size: 1rem; color: var(--cyan); letter-spacing: .08em; text-transform: uppercase; }
+
+    .chart-container { position: relative; height: 280px; width: 100%; }
+    
+    .table-wrap { overflow: auto; max-height: 500px; border-radius: 14px; background: rgba(0,0,0,0.2); }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    th, td { padding: 12px; border-bottom: 1px solid rgba(154,178,201,.1); text-align: left; }
+    th { color: var(--muted); text-transform: uppercase; font-size: .7rem; letter-spacing: .1em; position: sticky; top: 0; background: #0b1731; z-index: 1; }
+    td { color: var(--white); word-break: break-word; }
+
+    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: .74rem; font-weight: 700; }
+    .ok { background: rgba(70,247,177,.12); color: var(--ok); border: 1px solid rgba(70,247,177,.2); }
+    .bad { background: rgba(255,93,122,.12); color: #ff98aa; border: 1px solid rgba(255,93,122,.2); }
+
+    .ranking { display: flex; flex-direction: column; gap: 10px; }
+    .rank-item { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 12px; border: 1px solid rgba(0,229,255,.12); border-radius: 14px; background: rgba(255,255,255,.02); }
+    .rank-num { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; background: rgba(0,229,255,.12); color: var(--cyan); font-weight: 800; }
+    
+    .hidden { display: none !important; }
+    .statusbar { margin-top: 12px; color: var(--muted); font-size: .85rem; }
+    .empty { padding: 30px; text-align: center; color: var(--muted); }
+
+    @media (max-width: 1100px) { .grid-kpi { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid-main, .grid-individual { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header">
+    <div class="brand">
+      <h1>TECKNOLAB</h1>
+      <p>SERVIÇOS DE TESTE E MEDIÇÃO</p>
+    </div>
+    <div class="controls">
+      <button id="refreshBtn" class="btn" onclick="manualRefresh()"><span>🔄</span> Atualizar Dados</button>
+      <select id="periodFilter">
+        <option value="geral">Geral</option>
+        <option value="hoje">Hoje</option>
+        <option value="7">Últimos 7 dias</option>
+        <option value="30">Últimos 30 dias</option>
+      </select>
+      <select id="techFilter"></select>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="btn active" data-tab="general">Visão Geral da Equipe</button>
+    <button class="btn" data-tab="individual">Visão Individual</button>
+  </div>
+
+  <div id="generalTab" class="panel">
+    <div class="grid-kpi">
+      <div class="kpi"><div class="label">Total de Horas</div><div class="value" id="kpiHours">--</div><div class="sub">Filtrado</div></div>
+      <div class="kpi"><div class="label">Eficiência Geral</div><div class="value" id="kpiEff">--</div><div class="sub">Concluído / Total</div></div>
+      <div class="kpi"><div class="label">Pendentes</div><div class="value" id="kpiPend">--</div><div class="sub">Aguardando</div></div>
+      <div class="kpi"><div class="label">Qualificações</div><div class="value" id="kpiQual">--</div><div class="sub">Treinamentos</div></div>
+    </div>
+    <div class="grid-main">
+      <div class="card">
+        <h3>Carga por Departamento</h3>
+        <div class="chart-container"><canvas id="deptChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Investimento de Tempo</h3>
+        <div class="chart-container"><canvas id="mixChart"></canvas></div>
+      </div>
+    </div>
+    <div style="height:12px"></div>
+    <div class="card">
+      <h3>Gargalos e Pendências Recentes</h3>
+      <div class="table-wrap" id="bottleneckTable"></div>
+    </div>
+  </div>
+
+  <div id="individualTab" class="panel hidden">
+    <div class="grid-individual">
+      <div class="card">
+        <h3>Ranking de Eficiência</h3>
+        <div class="ranking" id="rankingList"></div>
+      </div>
+      <div>
+        <div class="grid-kpi" style="margin-bottom:12px">
+          <div class="kpi"><div class="label">Eficiência</div><div class="value" id="techEff">--</div></div>
+          <div class="kpi"><div class="label">Horas</div><div class="value" id="techHours">--</div></div>
+          <div class="kpi"><div class="label">Procedimentos</div><div class="value" id="techProc">--</div></div>
+          <div class="kpi"><div class="label">Registros</div><div class="value" id="techActs">--</div></div>
+        </div>
+        <div class="card">
+          <h3>Histórico Detalhado do Técnico</h3>
+          <div class="table-wrap" id="historyTable"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar" id="statusBar">Conectando à planilha...</div>
+</div>
+
+<script>
+// Configurações e Colunas baseadas no print enviado
+const LIVE_URL = "https://script.google.com/macros/s/AKfycbxdrWcMqIwCw8J4Hf0gom5200Hxh2NCFHEYeBXv6ZvV_X7f76ZnskAT4K3Q3XjlbUDI_w/exec";
+const REF_DATE = new Date(); 
+
+// Mapeamento das colunas da planilha (ajustado para incluir Análise Crítica e Detalhes da Ação)
+const COLS = [
+  'Colaborador', 'Departamento', 'Ação', 'Detalhes da ação', 
+  'Responsável pelo Treinamento', 'Instrumento Calibrado', 
+  'Procedimentos Executados', 'Período', 'Data', 'Duração', 
+  'Status', 'Análise crítica'
+];
+
+let rawData = [], activeTab = 'general', deptChart = null, mixChart = null;
+
+// Utilitários de parsing
+function parseCSV(text) {
+  const rows = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i], n = text[i+1];
+    if (c === '"') { if (q && n === '"') { cur += '"'; i++; } else q = !q; }
+    else if (c === ',' && !q) { row.push(cur); cur = ''; }
+    else if ((c === '\n' || c === '\r') && !q) { if (c === '\r' && n === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+
+function clean(v) { return (v ?? '').toString().trim(); }
+function parseDateBR(s) {
+  const m = clean(s).match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  return m ? new Date(+m[3], +m[2]-1, +m[1]) : null;
+}
+function parseDuration(s) {
+  const m = clean(s).match(/^(\d{2,3}):(\d{2}):(\d{2})$/);
+  return m ? (+m[1])*3600 + (+m[2])*60 + (+m[3]) : 0;
+}
+function fmtHM(sec) {
+  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60);
+  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+}
+
+// Filtros e Processamento
+function getFilteredRows() {
+  const p = document.getElementById('periodFilter').value;
+  if (p === 'geral') return rawData;
+  const start = new Date();
+  if (p === 'hoje') start.setHours(0,0,0,0);
+  else start.setDate(start.getDate() - parseInt(p));
+  return rawData.filter(r => {
+    const d = parseDateBR(r.Data);
+    return d && d >= start;
+  });
+}
+
+function renderGeneral(rows) {
+  const hours = rows.reduce((a,x) => a + parseDuration(x.Duração), 0);
+  const total = rows.length;
+  const concl = rows.filter(x => x.Status === 'Concluído').length;
+  const train = rows.filter(x => x.Ação === 'Treinamento').length;
+
+  document.getElementById('kpiHours').textContent = fmtHM(hours);
+  document.getElementById('kpiEff').textContent = total ? Math.round((concl/total)*100)+'%' : '0%';
+  document.getElementById('kpiPend').textContent = total - concl;
+  document.getElementById('kpiQual').textContent = train;
+
+  // Gráfico Dept
+  const depts = {};
+  rows.forEach(r => { const d = r.Departamento || 'N/A'; depts[d] = (depts[d]||0)+1; });
+  if(deptChart) deptChart.destroy();
+  deptChart = new Chart(document.getElementById('deptChart'), {
+    type: 'bar',
+    data: { 
+      labels: Object.keys(depts), 
+      datasets: [{ data: Object.values(depts), backgroundColor: '#00e5ff', borderRadius: 8 }] 
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  });
+
+  // Tabela Gargalos (Substituído Anotações por Detalhes da Ação)
+  const bottlenecks = rows.filter(x => x.Status !== 'Concluído').slice(0, 10);
+  renderTable('bottleneckTable', ['Colaborador', 'Data', 'Ação', 'Detalhes da ação', 'Status'], bottlenecks);
+}
+
+function renderIndividual(rows) {
+  const tech = document.getElementById('techFilter').value;
+  const tRows = rows.filter(r => r.Colaborador === tech);
+  
+  const hours = tRows.reduce((a,x) => a + parseDuration(x.Duração), 0);
+  const concl = tRows.filter(x => x.Status === 'Concluído').length;
+  
+  document.getElementById('techEff').textContent = tRows.length ? Math.round((concl/tRows.length)*100)+'%' : '0%';
+  document.getElementById('techHours').textContent = fmtHM(hours);
+  document.getElementById('techActs').textContent = tRows.length;
+
+  // Histórico com Analise Critica e Detalhes
+  renderTable('historyTable', ['Data', 'Ação', 'Instrumento Calibrado', 'Detalhes da ação', 'Status', 'Análise crítica'], tRows);
+
+  // Ranking
+  const techs = [...new Set(rawData.map(r => r.Colaborador))].filter(Boolean);
+  const ranking = techs.map(t => {
+    const r = rows.filter(x => x.Colaborador === t);
+    const c = r.filter(x => x.Status === 'Concluído').length;
+    return { name: t, eff: r.length ? (c/r.length) : 0, total: r.length };
+  }).sort((a,b) => b.eff - a.eff);
+
+  document.getElementById('rankingList').innerHTML = ranking.map((r, i) => `
+    <div class="rank-item">
+      <div class="rank-num">${i+1}</div>
+      <div>
+        <div style="font-weight:700">${r.name}</div>
+        <div style="font-size:0.75rem; color:var(--muted)">${r.total} tarefas</div>
+      </div>
+      <div class="pill ${r.eff >= 0.8 ? 'ok' : 'bad'}">${Math.round(r.eff*100)}%</div>
+    </div>
+  `).join('');
+}
+
+function renderTable(id, headers, data) {
+  const container = document.getElementById(id);
+  if (!data.length) { container.innerHTML = '<div class="empty">Nenhum dado para o período.</div>'; return; }
+  
+  let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+  data.forEach(row => {
+    html += '<tr>' + headers.map(h => {
+      let val = row[h] || '-';
+      if (h === 'Status') return `<td><span class="pill ${val === 'Concluído' ? 'ok' : 'bad'}">${val}</span></td>`;
+      return `<td>${val}</td>`;
+    }).join('') + '</tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function renderAll() {
+  const filtered = getFilteredRows();
+  if (activeTab === 'general') renderGeneral(filtered);
+  else renderIndividual(filtered);
+}
+
+async function loadData() {
+  try {
+    const resp = await fetch(`${LIVE_URL}&cb=${Date.now()}`);
+    const text = await resp.text();
+    const rows = parseCSV(text);
+    const headers = rows[0].map(clean);
+    
+    rawData = rows.slice(1).map(r => {
+      let obj = {};
+      headers.forEach((h, i) => {
+        // Mapeamento dinâmico baseado no nome das colunas da planilha
+        obj[h] = clean(r[i]);
+      });
+      return obj;
+    }).filter(r => r.Colaborador);
+
+    // Popular select de técnicos
+    const techs = [...new Set(rawData.map(r => r.Colaborador))].sort();
+    const sel = document.getElementById('techFilter');
+    const current = sel.value;
+    sel.innerHTML = techs.map(t => `<option value="${t}">${t}</option>`).join('');
+    if (current && techs.includes(current)) sel.value = current;
+
+    document.getElementById('statusBar').textContent = `Sincronizado: ${new Date().toLocaleTimeString()} | ${rawData.length} registros`;
+    renderAll();
+  } catch (e) {
+    document.getElementById('statusBar').textContent = "Erro ao carregar dados ao vivo.";
+  }
+}
+
+function manualRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true; btn.textContent = "⏳ Atualizando...";
+  loadData().then(() => {
+    btn.disabled = false; btn.textContent = "🔄 Atualizar Dados";
+  });
+}
+
+// Eventos
+document.querySelectorAll('.btn[data-tab]').forEach(b => b.addEventListener('click', () => {
+  activeTab = b.dataset.tab;
+  document.querySelectorAll('.btn[data-tab]').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById('generalTab').classList.toggle('hidden', activeTab !== 'general');
+  document.getElementById('individualTab').classList.toggle('hidden', activeTab !== 'individual');
+  renderAll();
+}));
+
+document.getElementById('periodFilter').addEventListener('change', renderAll);
+document.getElementById('techFilter').addEventListener('change', renderAll);
+
+// Início
+loadData();
+setInterval(loadData, 60000); // Auto-refresh a cada 1 min
+</script>
+
+</body>
+</html>
