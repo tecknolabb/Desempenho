@@ -1,134 +1,462 @@
-<!doctype html><html lang="pt-BR"><head> <meta charset="utf-8" /> <meta name="viewport" content="width=device-width, initial-scale=1" /> <title>TECKNOLAB | Dashboard</title> <link rel="preconnect" href="https://fonts.googleapis.com"> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet"> <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script> <style> :root { --bg: #030816; --panel: #07122a; --panel2: #0b1731; --line: #14305f; --cyan: #00e5ff; --cyan2: #00bcd4; --white: #f6fbff; --muted: #9ab2c9; --danger: #ff5d7a; --ok: #46f7b1; } * { box-sizing: border-box; } body { margin: 0; font-family: Inter, sans-serif; background: radial-gradient(circle at top, #0a1636 0, #030816 45%, #02040b 100%); color: var(--white); min-height: 100vh; } ::-webkit-scrollbar { width: 8px; height: 8px; } ::-webkit-scrollbar-track { background: rgba(0, 229, 255, 0.05); border-radius: 10px; } ::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.2); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: rgba(0, 229, 255, 0.5); }
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TECKNOLAB | Dashboard Gerencial</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: #030816;
+            --panel: #07122a;
+            --panel2: #0b1731;
+            --line: #14305f;
+            --cyan: #00e5ff;
+            --cyan2: #00bcd4;
+            --white: #f6fbff;
+            --muted: #9ab2c9;
+            --danger: #ff5d7a;
+            --ok: #46f7b1;
+        }
 
-.wrap { max-width: 1600px; margin: 0 auto; padding: 18px; } .header { display: flex; gap: 16px; justify-content: space-between; align-items: flex-end; padding: 18px 22px; background: linear-gradient(180deg, rgba(6,16,38,.88), rgba(4,10,24,.65)); border: 1px solid rgba(0,229,255,.18); border-radius: 22px; box-shadow: 0 0 0 1px rgba(255,255,255,.03), 0 18px 60px rgba(0,0,0,.35); } .brand h1 { margin: 0; font-family: Orbitron, sans-serif; font-size: clamp(2rem, 4vw, 3.6rem); letter-spacing: .18em; color: var(--cyan); text-shadow: 0 0 16px rgba(0,229,255,.35); } .brand p { margin: .2rem 0 0; color: var(--white); letter-spacing: .22em; font-size: .78rem; opacity: .9; } .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; align-items: center; } select, .btn { background: rgba(9,18,40,.9); color: var(--white); border: 1px solid rgba(0,229,255,.25); border-radius: 14px; padding: 12px 14px; font-weight: 600; outline: none; transition: all 0.2s ease; } select:focus, .btn:hover { border-color: rgba(0,229,255,.7); box-shadow: 0 0 0 3px rgba(0,229,255,.08); } .btn { cursor: pointer; } .btn.active { background: linear-gradient(135deg, rgba(0,229,255,.2), rgba(0,229,255,.05)); color: var(--cyan); box-shadow: inset 0 0 0 1px rgba(0,229,255,.3); } #refreshBtn { background: linear-gradient(135deg, rgba(0,229,255,.15), rgba(0,229,255,.02)); border-color: var(--cyan); color: var(--cyan); display: flex; align-items: center; gap: 6px; }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top, #0a1636 0, #030816 45%, #02040b 100%);
+            color: var(--white);
+            min-height: 100vh;
+        }
 
-.tabs { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; } .panel { background: linear-gradient(180deg, rgba(8,18,43,.88), rgba(4,10,24,.92)); border: 1px solid rgba(0,229,255,.14); border-radius: 20px; padding: 16px; box-shadow: 0 12px 50px rgba(0,0,0,.28); min-width: 0; } .grid-kpi { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; } .kpi { background: linear-gradient(180deg, rgba(11,23,49,.96), rgba(6,14,32,.95)); border: 1px solid rgba(0,229,255,.14); border-radius: 18px; padding: 16px; min-height: 104px; } .kpi .label { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; } .kpi .value { font-size: 1.7rem; font-weight: 800; margin-top: 10px; color: var(--white); } .kpi .sub { font-size: .82rem; color: var(--muted); margin-top: 6px; }
+        .wrap { max-width: 1600px; margin: 0 auto; padding: 18px; }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 22px;
+            background: linear-gradient(180deg, rgba(6,16,38,.88), rgba(4,10,24,.65));
+            border: 1px solid rgba(0,229,255,.18);
+            border-radius: 22px;
+            box-shadow: 0 18px 60px rgba(0,0,0,.35);
+            margin-bottom: 20px;
+        }
 
-.grid-main { display: grid; grid-template-columns: 1.2fr .8fr; gap: 12px; align-items: start; } .grid-individual { display: grid; grid-template-columns: .8fr 1.2fr; gap: 12px; align-items: start; } .card { background: linear-gradient(180deg, rgba(11,23,49,.94), rgba(6,14,32,.95)); border: 1px solid rgba(0,229,255,.14); border-radius: 18px; padding: 14px; min-width: 0; } .card h3 { margin: 0 0 12px; font-size: 1rem; color: var(--cyan); letter-spacing: .08em; text-transform: uppercase; }
+        .brand h1 {
+            margin: 0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            letter-spacing: .18em;
+            color: var(--cyan);
+            text-shadow: 0 0 16px rgba(0,229,255,.35);
+        }
 
-.chart-container { position: relative; height: 280px; width: 100%; } .table-wrap { overflow: auto; max-height: 500px; border-radius: 14px; background: rgba(0,0,0,0.2); } table { width: 100%; border-collapse: collapse; font-size: .85rem; } th, td { padding: 12px; border-bottom: 1px solid rgba(154,178,201,.1); text-align: left; } th { color: var(--muted); text-transform: uppercase; font-size: .7rem; letter-spacing: .1em; position: sticky; top: 0; background: #0b1731; z-index: 1; } td { color: var(--white); word-break: break-word; }
+        .brand p {
+            margin: .2rem 0 0;
+            color: var(--white);
+            letter-spacing: .22em;
+            font-size: .78rem;
+            opacity: .9;
+        }
 
-.pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: .74rem; font-weight: 700; } .ok { background: rgba(70,247,177,.12); color: var(--ok); border: 1px solid rgba(70,247,177,.2); } .bad { background: rgba(255,93,122,.12); color: #ff98aa; border: 1px solid rgba(255,93,122,.2); }
+        .controls { display: flex; gap: 10px; align-items: center; }
 
-.ranking { display: flex; flex-direction: column; gap: 10px; } .rank-item { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 12px; border: 1px solid rgba(0,229,255,.12); border-radius: 14px; background: rgba(255,255,255,.02); } .rank-num { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; background: rgba(0,229,255,.12); color: var(--cyan); font-weight: 800; } .hidden { display: none !important; } .statusbar { margin-top: 12px; color: var(--muted); font-size: .85rem; } .empty { padding: 30px; text-align: center; color: var(--muted); }
+        select, .btn {
+            background: rgba(9,18,40,.9);
+            color: var(--white);
+            border: 1px solid rgba(0,229,255,.25);
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.2s ease;
+        }
 
-@media (max-width: 1100px) { .grid-kpi { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid-main, .grid-individual { grid-template-columns: 1f
+        select:focus, .btn:hover {
+            border-color: rgba(0,229,255,.7);
+            box-shadow: 0 0 0 3px rgba(0,229,255,.08);
+        }
 
-<div id="teamTab">
-        <div class="grid-kpi">
-            <div class="kpi"><div class="label">Banco de horas total da equipe</div><div id="totalHours" class="value">--</div></div>
-            <div class="kpi"><div class="label">Eficiência Técnica</div><div id="teamEff" class="value">--</div></div>
-            <div class="kpi"><div class="label">Pendências Recentes</div><div id="activeTasks" class="value">--</div></div>
-            <div class="kpi"><div class="label">Registros Hoje</div><div id="todayTasks" class="value">--</div></div>
-        </div>
-        <div class="card">
-            <h3>Últimas Atividades da Equipe</h3>
-            <div class="table-wrap" id="teamTable">Carregando dados...</div>
-        </div>
-    </div>
+        .btn { cursor: pointer; }
+        .btn.active {
+            background: linear-gradient(135deg, rgba(0,229,255,.2), rgba(0,229,255,.05));
+            color: var(--cyan);
+            box-shadow: inset 0 0 0 1px rgba(0,229,255,.3);
+        }
 
-    <div id="indivTab" class="hidden">
-        <div class="card">
-            <div style="display:flex; justify-content: space-between; align-items: center;">
-                <h3>Histórico Individual</h3>
-                <select id="techFilter" onchange="render()" style="padding:8px; border-radius:8px; background:#0f172a; color:white; border:1px solid var(--purple);"></select>
+        .tabs { display: flex; gap: 10px; margin: 16px 0; }
+
+        .grid-kpi {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .kpi {
+            background: linear-gradient(180deg, rgba(11,23,49,.96), rgba(6,14,32,.95));
+            border: 1px solid rgba(0,229,255,.14);
+            border-radius: 18px;
+            padding: 16px;
+        }
+
+        .kpi .label {
+            font-size: .72rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .12em;
+        }
+
+        .kpi .value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-top: 6px;
+            color: var(--white);
+        }
+
+        .kpi .sub { font-size: .75rem; color: var(--muted); margin-top: 4px; }
+
+        .grid-main {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(11,23,49,.94), rgba(6,14,32,.95));
+            border: 1px solid rgba(0,229,255,.14);
+            border-radius: 18px;
+            padding: 16px;
+        }
+
+        .card h3 {
+            margin: 0 0 12px;
+            font-size: 0.9rem;
+            color: var(--cyan);
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .chart-container { position: relative; height: 260px; width: 100%; }
+
+        .table-wrap {
+            overflow: auto;
+            max-height: 400px;
+            border-radius: 14px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+        th, td { padding: 12px; border-bottom: 1px solid rgba(154,178,201,.1); text-align: left; }
+        th { color: var(--muted); text-transform: uppercase; font-size: .7rem; letter-spacing: .1em; position: sticky; top: 0; background: #0b1731; z-index: 1; }
+        td { color: var(--white); }
+
+        .hidden { display: none !important; }
+        .statusbar { margin-top: 12px; color: var(--muted); font-size: .75rem; }
+
+        @media (max-width: 1024px) {
+            .grid-kpi { grid-template-columns: repeat(2, 1fr); }
+            .grid-main { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="header">
+            <div class="brand">
+                <h1>TECKNOLAB</h1>
+                <p>SERVIÇOS DE TESTE E MEDIÇÃO</p>
             </div>
-            <div class="table-wrap" id="indivTable"></div>
+            <div class="controls">
+                <button class="btn" id="refreshBtn" onclick="loadData()">🔄 Atualizar Dados</button>
+                <select id="globalFilter" onchange="applyGlobalFilter()">
+                    <option value="Geral">Geral</option>
+                </select>
+                <select id="techFilter" onchange="applyTechFilter()">
+                    <option value="">Colaborador</option>
+                </select>
+            </div>
         </div>
+
+        <div class="tabs">
+            <button class="btn active" id="btnTeam" onclick="switchTab('team')">Visão Geral da Equipe</button>
+            <button class="btn" id="btnIndiv" onclick="switchTab('indiv')">Visão Individual</button>
+        </div>
+
+        <div id="teamTab">
+            <div class="grid-kpi">
+                <div class="kpi">
+                    <div class="label">Total de Horas</div>
+                    <div id="totalHours" class="value">00:00</div>
+                    <div class="sub">Soma da duração filtrada</div>
+                </div>
+                <div class="kpi">
+                    <div class="label">Eficiência Geral</div>
+                    <div id="teamEff" class="value">0%</div>
+                    <div class="sub">Status Concluído / Total</div>
+                </div>
+                <div class="kpi">
+                    <div class="label">Tarefas Pendentes</div>
+                    <div id="activeTasks" class="value">0</div>
+                    <div class="sub">Registros não concluídos</div>
+                </div>
+                <div class="kpi">
+                    <div class="label">Qualificações</div>
+                    <div id="totalQualifications" class="value">0</div>
+                    <div class="sub">Ações de Treinamento</div>
+                </div>
+            </div>
+
+            <div class="grid-main">
+                <div class="card">
+                    <h3>Carga por Departamento</h3>
+                    <div class="chart-container">
+                        <canvas id="deptChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Investimento de Tempo</h3>
+                    <div class="chart-container">
+                        <canvas id="timeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Últimos Gargalos / Atividades</h3>
+                <div class="table-wrap" id="teamTable">Carregando informações da base de dados...</div>
+            </div>
+        </div>
+
+        <div id="indivTab" class="hidden">
+            <div class="card">
+                <h3>Histórico Detalhado do Colaborador</h3>
+                <div class="table-wrap" id="indivTable">Selecione um colaborador no menu superior.</div>
+            </div>
+        </div>
+
+        <div class="statusbar" id="statusBar">Aguardando sincronização inicial...</div>
     </div>
-    <div id="statusBar" style="font-size:0.7rem; color:var(--muted); margin-top:10px;">Aguardando sincronização...</div>
-</div>
 
-<script>
-    // URL DE EXPORTAÇÃO CSV (A que funciona no seu primeiro código)
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ojqDletct5yLCPXzFtIFvBEndLwRfK318UMKBeSPBBs/gviz/tq?tqx=out:csv&sheet=Dados";
-    
-    let rawData = [];
+    <script>
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ojqDletct5yLCPXzFtIFvBEndLwRfK318UMKBeSPBBs/gviz/tq?tqx=out:csv&sheet=Dados";
+        
+        let rawData = [];
+        let filteredData = [];
+        let deptChartInstance = null;
+        let timeChartInstance = null;
 
-    // Função para processar o texto do CSV
-    function parseCSV(text) {
-        const rows = [];
-        let row = [], cur = '', q = false;
-        for (let i = 0; i < text.length; i++) {
-            const c = text[i], n = text[i+1];
-            if (c === '"') { if (q && n === '"') { cur += '"'; i++; } else q = !q; }
-            else if (c === ',' && !q) { row.push(cur); cur = ''; }
-            else if ((c === '\n' || c === '\r') && !q) {
-                if (c === '\r' && n === '\n') i++;
-                row.push(cur); rows.push(row); row = []; cur = '';
-            } else cur += c;
+        function parseCSV(text) {
+            const rows = [];
+            let row = [], cur = '', q = false;
+            for (let i = 0; i < text.length; i++) {
+                const c = text[i], n = text[i+1];
+                if (c === '"') { if (q && n === '"') { cur += '"'; i++; } else q = !q; }
+                else if (c === ',' && !q) { row.push(cur); cur = ''; }
+                else if ((c === '\n' || c === '\r') && !q) {
+                    if (c === '\r' && n === '\n') i++;
+                    row.push(cur); rows.push(row); row = []; cur = '';
+                } else cur += c;
+            }
+            if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+            return rows;
         }
-        if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
-        return rows;
-    }
 
-    async function loadData() {
-        document.getElementById('statusBar').innerText = "Sincronizando com a nuvem...";
-        try {
-            const response = await fetch(SHEET_CSV_URL + "&cb=" + Date.now());
-            const text = await response.text();
-            const rows = parseCSV(text);
-            const headers = rows[0].map(h => h.trim());
-            
-            rawData = rows.slice(1).map(r => {
-                let obj = {};
-                headers.forEach((h, i) => obj[h] = r[i] ? r[i].trim() : "");
-                return obj;
-            }).filter(r => r.Colaborador);
+        async function loadData() {
+            document.getElementById('statusBar').innerText = "Buscando dados atualizados do Sheets...";
+            try {
+                const response = await fetch(SHEET_CSV_URL + "&cb=" + Date.now());
+                const text = await response.text();
+                const rows = parseCSV(text);
+                const headers = rows[0].map(h => h.trim());
+                
+                rawData = rows.slice(1).map(r => {
+                    let obj = {};
+                    headers.forEach((h, i) => obj[h] = r[i] ? r[i].trim() : "");
+                    return obj;
+                }).filter(r => r.Colaborador);
 
-            initFilters();
+                populateFilters();
+                resetFiltersToGeral();
+                document.getElementById('statusBar').innerText = "Última sincronização completa: " + new Date().toLocaleTimeString();
+            } catch (e) {
+                document.getElementById('statusBar').innerText = "Falha de conexão com a planilha eletrônica.";
+                console.error(e);
+            }
+        }
+
+        function populateFilters() {
+            const techs = [...new Set(rawData.map(r => r.Colaborador))].sort();
+            const techFilter = document.getElementById('techFilter');
+            techFilter.innerHTML = '<option value="">Filtrar por Técnico</option>' + techs.map(t => `<option value="${t}">${t}</option>`).join('');
+        }
+
+        function resetFiltersToGeral() {
+            document.getElementById('globalFilter').value = "Geral";
+            document.getElementById('techFilter').value = "";
+            filteredData = [...rawData];
             render();
-            document.getElementById('statusBar').innerText = "Última atualização: " + new Date().toLocaleTimeString();
-        } catch (e) {
-            document.getElementById('statusBar').innerText = "Erro ao ler a planilha. Verifique a internet.";
-            console.error(e);
         }
-    }
 
-    function initFilters() {
-        const techs = [...new Set(rawData.map(r => r.Colaborador))].sort();
-        const filter = document.getElementById('techFilter');
-        const current = filter.value;
-        filter.innerHTML = techs.map(t => `<option value="${t}">${t}</option>`).join('');
-        if(current) filter.value = current;
-    }
+        function applyGlobalFilter() {
+            document.getElementById('techFilter').value = "";
+            filteredData = [...rawData];
+            render();
+        }
 
-    function render() {
-        // KPI - Eficiência
-        const total = rawData.length;
-        const concl = rawData.filter(r => r.Status === 'Concluído').length;
-        document.getElementById('teamEff').innerText = total ? Math.round((concl/total)*100) + "%" : "--";
-        document.getElementById('totalHours').innerText = total; // Contagem simples de registros
-        document.getElementById('activeTasks').innerText = rawData.filter(r => r.Status !== 'Concluído').length;
+        function applyTechFilter() {
+            const tech = document.getElementById('techFilter').value;
+            if (tech) {
+                document.getElementById('globalFilter').value = "Geral";
+                filteredData = rawData.filter(r => r.Colaborador === tech);
+            } else {
+                filteredData = [...rawData];
+            }
+            render();
+        }
 
-        // Tabela Equipe
-        const teamHtml = `<table><thead><tr><th>Técnico</th><th>Data</th><th>Ação</th><th>Status</th></tr></thead><tbody>` + 
-            rawData.slice(0, 15).map(r => `<tr>
-                <td>${r.Colaborador}</td>
-                <td class="col-date">${r.Data}</td>
-                <td>${r.Ação}</td>
-                <td><span style="color:${r.Status === 'Concluído' ? '#4ade80' : '#f87171'}">${r.Status}</span></td>
-            </tr>`).join('') + `</tbody></table>`;
-        document.getElementById('teamTable').innerHTML = teamHtml;
+        function parseDurationToMinutes(durationStr) {
+            if (!durationStr || !durationStr.includes(':')) return 0;
+            const parts = durationStr.split(':');
+            const hrs = parseInt(parts[0], 10) || 0;
+            const mins = parseInt(parts[1], 10) || 0;
+            return (hrs * 60) + mins;
+        }
 
-        // Tabela Individual
-        const selectedTech = document.getElementById('techFilter').value;
-        const techData = rawData.filter(r => r.Colaborador === selectedTech);
-        const indivHtml = `<table><thead><tr><th>Data</th><th>Duração</th><th>Ação</th><th>Anotações</th></tr></thead><tbody>` + 
-            techData.map(r => `<tr>
-                <td class="col-date">${r.Data}</td>
-                <td>${r.Duração}</td>
-                <td>${r.Ação}</td>
-                <td>${r.Anotações}</td>
-            </tr>`).join('') + `</tbody></table>`;
-        document.getElementById('indivTable').innerHTML = indivHtml;
-    }
+        function formatMinutesToHours(totalMinutes) {
+            const hrs = Math.floor(totalMinutes / 60);
+            const mins = totalMinutes % 60;
+            return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+        }
 
-    function switchTab(tab) {
-        document.getElementById('teamTab').classList.toggle('hidden', tab !== 'team');
-        document.getElementById('indivTab').classList.toggle('hidden', tab !== 'indiv');
-    }
+        function render() {
+            // 1. Cálculos de KPIs básicos
+            const totalRecords = filteredData.length;
+            const completed = filteredData.filter(r => r.Status === 'Concluído').length;
+            const pending = filteredData.filter(r => r.Status === 'Pendente' || r.Status === '').length;
+            const qualifications = filteredData.filter(r => r.Ação === 'Treinamento').length;
 
-    // Início automático
-    loadData();
-</script>
+            let totalMinutes = 0;
+            filteredData.forEach(r => { totalMinutes += parseDurationToMinutes(r.Duração); });
+
+            document.getElementById('totalHours').innerText = formatMinutesToHours(totalMinutes);
+            document.getElementById('teamEff').innerText = totalRecords ? Math.round((completed / totalRecords) * 100) + "%" : "0%";
+            document.getElementById('activeTasks').innerText = pending;
+            document.getElementById('totalQualifications').innerText = qualifications;
+
+            // 2. Renderização das Tabelas (Geral e Individual)
+            renderTables();
+
+            // 3. Processamento e atualização de Gráficos
+            renderCharts();
+        }
+
+        function renderTables() {
+            // Tabela Principal (Visão Geral)
+            const teamHtml = `<table><thead><tr><th>Colaborador</th><th>Departamento</th><th>Ação</th><th>Data</th><th>Duração</th><th>Status</th></tr></thead><tbody>` + 
+                filteredData.slice(0, 30).map(r => `<tr>
+                    <td><b>${r.Colaborador}</b></td>
+                    <td>${r.Departamento || '-'}</td>
+                    <td>${r.Ação || '-'}</td>
+                    <td>${r.Data}</td>
+                    <td>${r.Duração || '00:00'}</td>
+                    <td><span style="color:${r.Status === 'Concluído' ? 'var(--ok)' : 'var(--danger)'}; font-weight:700;">${r.Status || 'Pendente'}</span></td>
+                </tr>`).join('') + `</tbody></table>`;
+            document.getElementById('teamTable').innerHTML = teamHtml;
+
+            // Tabela Detalhada (Visão Individual)
+            const indivHtml = `<table><thead><tr><th>Data</th><th>Departamento</th><th>Ação</th><th>Duração</th><th>Status</th><th>Análise Crítica</th></tr></thead><tbody>` + 
+                filteredData.map(r => `<tr>
+                    <td>${r.Data}</td>
+                    <td>${r.Departamento}</td>
+                    <td>${r.Ação}</td>
+                    <td>${r.Duração}</td>
+                    <td><span style="color:${r.Status === 'Concluído' ? 'var(--ok)' : 'var(--danger)'};">${r.Status || 'Pendente'}</span></td>
+                    <td>${r['Análise crítica'] || r['Análise Crítica'] || '-'}</td>
+                </tr>`).join('') + `</tbody></table>`;
+            document.getElementById('indivTable').innerHTML = indivHtml;
+        }
+
+        function renderCharts() {
+            // Agrupamento por Departamento (Gráfico de Barras)
+            const deptCounts = {};
+            filteredData.forEach(r => {
+                const d = r.Departamento || 'Não Informado';
+                deptCounts[d] = (deptCounts[d] || 0) + 1;
+            });
+
+            // Agrupamento por Tipo de Ação (Gráfico de Investimento de Tempo - Rosca)
+            const actionCounts = {};
+            filteredData.forEach(r => {
+                const a = r.Ação || 'Outros';
+                actionCounts[a] = (actionCounts[a] || 0) + 1;
+            });
+
+            // Destruir instâncias antigas para evitar sobreposição ao atualizar
+            if (deptChartInstance) deptChartInstance.destroy();
+            if (timeChartInstance) timeChartInstance.destroy();
+
+            // Gráfico 1: Departamento
+            const ctxDept = document.getElementById('deptChart').getContext('2d');
+            deptChartInstance = new Chart(ctxDept, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(deptCounts),
+                    datasets: [{
+                        label: 'Registros',
+                        data: Object.values(deptCounts),
+                        backgroundColor: '#00bcd4',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#9ab2c9' } },
+                        y: { grid: { color: 'rgba(20,48,95,0.4)' }, ticks: { color: '#9ab2c9' } }
+                    }
+                }
+            });
+
+            // Gráfico 2: Investimento de Tempo (Ação)
+            const ctxTime = document.getElementById('timeChart').getContext('2d');
+            timeChartInstance = new Chart(ctxTime, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(actionCounts),
+                    datasets: [{
+                        data: Object.values(actionCounts),
+                        backgroundColor: ['#00e5ff', '#14305f', '#46f7b1', '#ff5d7a'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#9ab2c9', font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        function switchTab(tab) {
+            document.getElementById('teamTab').classList.toggle('hidden', tab !== 'team');
+            document.getElementById('indivTab').classList.toggle('hidden', tab !== 'indiv');
+            
+            document.getElementById('btnTeam').classList.toggle('active', tab === 'team');
+            document.getElementById('btnIndiv').classList.toggle('active', tab === 'indiv');
+        }
+
+        // Execução ao abrir a página
+        loadData();
+    </script>
+</body>
+</html>
