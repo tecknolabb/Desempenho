@@ -1,462 +1,350 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TECKNOLAB | Dashboard Gerencial</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-            --bg: #030816;
-            --panel: #07122a;
-            --panel2: #0b1731;
-            --line: #14305f;
-            --cyan: #00e5ff;
-            --cyan2: #00bcd4;
-            --white: #f6fbff;
-            --muted: #9ab2c9;
-            --danger: #ff5d7a;
-            --ok: #46f7b1;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tecknolab · Painel Analítico</title>
 
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at top, #0a1636 0, #030816 45%, #02040b 100%);
-            color: var(--white);
-            min-height: 100vh;
-        }
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 
-        .wrap { max-width: 1600px; margin: 0 auto; padding: 18px; }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 22px;
-            background: linear-gradient(180deg, rgba(6,16,38,.88), rgba(4,10,24,.65));
-            border: 1px solid rgba(0,229,255,.18);
-            border-radius: 22px;
-            box-shadow: 0 18px 60px rgba(0,0,0,.35);
-            margin-bottom: 20px;
-        }
+  <script src="https://unpkg.com/prop-types@15/prop-types.min.js" crossorigin></script>
+  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js" crossorigin></script>
 
-        .brand h1 {
-            margin: 0;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.2rem;
-            letter-spacing: .18em;
-            color: var(--cyan);
-            text-shadow: 0 0 16px rgba(0,229,255,.35);
-        }
+  <script src="https://unpkg.com/@babel/standalone@7.23.9/babel.min.js"></script>
 
-        .brand p {
-            margin: .2rem 0 0;
-            color: var(--white);
-            letter-spacing: .22em;
-            font-size: .78rem;
-            opacity: .9;
-        }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800;900&display=swap" rel="stylesheet" />
 
-        .controls { display: flex; gap: 10px; align-items: center; }
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: #0b0c16; font-family: 'JetBrains Mono', 'Courier New', monospace; color: #fff; }
 
-        select, .btn {
-            background: rgba(9,18,40,.9);
-            color: var(--white);
-            border: 1px solid rgba(0,229,255,.25);
-            border-radius: 14px;
-            padding: 12px 14px;
-            font-weight: 600;
-            outline: none;
-            transition: all 0.2s ease;
-        }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #0f1021; }
+    ::-webkit-scrollbar-thumb { background: #1f2244; border-radius: 3px; }
 
-        select:focus, .btn:hover {
-            border-color: rgba(0,229,255,.7);
-            box-shadow: 0 0 0 3px rgba(0,229,255,.08);
-        }
-
-        .btn { cursor: pointer; }
-        .btn.active {
-            background: linear-gradient(135deg, rgba(0,229,255,.2), rgba(0,229,255,.05));
-            color: var(--cyan);
-            box-shadow: inset 0 0 0 1px rgba(0,229,255,.3);
-        }
-
-        .tabs { display: flex; gap: 10px; margin: 16px 0; }
-
-        .grid-kpi {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .kpi {
-            background: linear-gradient(180deg, rgba(11,23,49,.96), rgba(6,14,32,.95));
-            border: 1px solid rgba(0,229,255,.14);
-            border-radius: 18px;
-            padding: 16px;
-        }
-
-        .kpi .label {
-            font-size: .72rem;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: .12em;
-        }
-
-        .kpi .value {
-            font-size: 1.8rem;
-            font-weight: 800;
-            margin-top: 6px;
-            color: var(--white);
-        }
-
-        .kpi .sub { font-size: .75rem; color: var(--muted); margin-top: 4px; }
-
-        .grid-main {
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .card {
-            background: linear-gradient(180deg, rgba(11,23,49,.94), rgba(6,14,32,.95));
-            border: 1px solid rgba(0,229,255,.14);
-            border-radius: 18px;
-            padding: 16px;
-        }
-
-        .card h3 {
-            margin: 0 0 12px;
-            font-size: 0.9rem;
-            color: var(--cyan);
-            letter-spacing: .08em;
-            text-transform: uppercase;
-        }
-
-        .chart-container { position: relative; height: 260px; width: 100%; }
-
-        .table-wrap {
-            overflow: auto;
-            max-height: 400px;
-            border-radius: 14px;
-            background: rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        table { width: 100%; border-collapse: collapse; font-size: .85rem; }
-        th, td { padding: 12px; border-bottom: 1px solid rgba(154,178,201,.1); text-align: left; }
-        th { color: var(--muted); text-transform: uppercase; font-size: .7rem; letter-spacing: .1em; position: sticky; top: 0; background: #0b1731; z-index: 1; }
-        td { color: var(--white); }
-
-        .hidden { display: none !important; }
-        .statusbar { margin-top: 12px; color: var(--muted); font-size: .75rem; }
-
-        @media (max-width: 1024px) {
-            .grid-kpi { grid-template-columns: repeat(2, 1fr); }
-            .grid-main { grid-template-columns: 1fr; }
-        }
-    </style>
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fadeInUp { animation: fadeInUp 0.45s ease both; }
+    
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(0, 212, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.015) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+    select option { background: #131528; }
+    .pulse-cyan:hover { box-shadow: 0 0 15px rgba(0, 212, 255, 0.4); }
+  </style>
 </head>
 <body>
-    <div class="wrap">
-        <div class="header">
-            <div class="brand">
-                <h1>TECKNOLAB</h1>
-                <p>SERVIÇOS DE TESTE E MEDIÇÃO</p>
-            </div>
-            <div class="controls">
-                <button class="btn" id="refreshBtn" onclick="loadData()">🔄 Atualizar Dados</button>
-                <select id="globalFilter" onchange="applyGlobalFilter()">
-                    <option value="Geral">Geral</option>
-                </select>
-                <select id="techFilter" onchange="applyTechFilter()">
-                    <option value="">Colaborador</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="tabs">
-            <button class="btn active" id="btnTeam" onclick="switchTab('team')">Visão Geral da Equipe</button>
-            <button class="btn" id="btnIndiv" onclick="switchTab('indiv')">Visão Individual</button>
-        </div>
-
-        <div id="teamTab">
-            <div class="grid-kpi">
-                <div class="kpi">
-                    <div class="label">Total de Horas</div>
-                    <div id="totalHours" class="value">00:00</div>
-                    <div class="sub">Soma da duração filtrada</div>
-                </div>
-                <div class="kpi">
-                    <div class="label">Eficiência Geral</div>
-                    <div id="teamEff" class="value">0%</div>
-                    <div class="sub">Status Concluído / Total</div>
-                </div>
-                <div class="kpi">
-                    <div class="label">Tarefas Pendentes</div>
-                    <div id="activeTasks" class="value">0</div>
-                    <div class="sub">Registros não concluídos</div>
-                </div>
-                <div class="kpi">
-                    <div class="label">Qualificações</div>
-                    <div id="totalQualifications" class="value">0</div>
-                    <div class="sub">Ações de Treinamento</div>
-                </div>
-            </div>
-
-            <div class="grid-main">
-                <div class="card">
-                    <h3>Carga por Departamento</h3>
-                    <div class="chart-container">
-                        <canvas id="deptChart"></canvas>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>Investimento de Tempo</h3>
-                    <div class="chart-container">
-                        <canvas id="timeChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>Últimos Gargalos / Atividades</h3>
-                <div class="table-wrap" id="teamTable">Carregando informações da base de dados...</div>
-            </div>
-        </div>
-
-        <div id="indivTab" class="hidden">
-            <div class="card">
-                <h3>Histórico Detalhado do Colaborador</h3>
-                <div class="table-wrap" id="indivTable">Selecione um colaborador no menu superior.</div>
-            </div>
-        </div>
-
-        <div class="statusbar" id="statusBar">Aguardando sincronização inicial...</div>
+  <div id="root">
+    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:16px;">
+      <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#00d4ff,#d946ef);display:flex;align-items:center;justify-content:center;font-size:22px;">⚡</div>
+      <p style="color:#475569;font-family:monospace;font-size:12px;letter-spacing:0.1em;">TECKNOLAB · CARREGANDO INTERFACE ANALÍTICA...</p>
     </div>
+  </div>
 
-    <script>
-        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ojqDletct5yLCPXzFtIFvBEndLwRfK318UMKBeSPBBs/gviz/tq?tqx=out:csv&sheet=Dados";
+<script type="text/babel">
+const { useState, useMemo, useCallback, useEffect } = React;
+const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } = Recharts;
+
+// Configuração da Planilha
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwLwzmvOTNKI9DiQbAMtWF03ArjgbOl4dEdr1-iU68Mhd9liDuUSN39dclBHtFXjaW15g/exec";
+
+const COL_MAP = {
+  date:                ["data", "date", "data da atividade", "dt"],
+  collaborator:        ["colaborador", "colaboradora", "nome", "funcionário", "funcionario"],
+  department:          ["departamento", "setor", "área", "area", "dept"],
+  action:              ["ação", "acao", "atividade", "tarefa", "descrição", "descricao"],
+  duration:            ["duração", "duracao", "horas", "tempo", "duration", "h"],
+  status:              ["status", "situação", "situacao", "estado"],
+  type:                ["tipo", "type", "categoria", "category"],
+  trainingResponsible: ["responsável pelo treinamento", "responsavel pelo treinamento", "instrutor", "instructor"],
+};
+
+// Cores
+const DEPT_COLORS  = { "Lab. Elétrica":"#00d4ff", "Lab. Manutenção":"#d946ef", "Administrativo":"#8b5cf6", "Atividade Externa":"#3b82f6" };
+const TYPE_COLORS  = { "Tarefa":"#00d4ff", "Treinamento":"#d946ef", "Curso":"#ec4899" };
+const STATUS_CFG   = {
+  "Concluído": { bg:"rgba(16,185,129,.15)", border:"rgba(16,185,129,.4)", text:"#10b981", dot:"#10b981" },
+  "Pendente":  { bg:"rgba(239,68,68,.15)",  border:"rgba(239,68,68,.4)",  text:"#ef4444", dot:"#ef4444" },
+};
+
+// Dados de Backup caso a planilha falhe
+const MOCK_DATA = [
+  { id:1, date:"2026-05-06", collaborator:"Cátia", department:"Administrativo", action:"Tarefa administrativa", duration:8, status:"Concluído", type:"Tarefa", trainingResponsible:null },
+  { id:2, date:"2026-05-07", collaborator:"Cátia", department:"Administrativo", action:"Fechamento de chamados", duration:4, status:"Pendente", type:"Tarefa", trainingResponsible:null },
+  { id:3, date:"2026-04-01", collaborator:"Pedro", department:"Lab. Manutenção", action:"Treinamento de calibração", duration:2, status:"Concluído", type:"Treinamento", trainingResponsible:"Prof. Roberto Alves" },
+  { id:4, date:"2026-05-10", collaborator:"Marina Costa", department:"Lab. Elétrica", action:"Calibração Instrumentos", duration:11, status:"Concluído", type:"Tarefa", trainingResponsible:null },
+];
+
+// Parser CSV
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const parseRow = (line) => {
+    const result = []; let current = ''; let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') inQuotes = !inQuotes;
+      else if (line[i] === ',' && !inQuotes) { result.push(current.trim()); current = ''; }
+      else current += line[i];
+    }
+    result.push(current.trim()); return result;
+  };
+  const headers = parseRow(lines[0]).map(h => h.toLowerCase().replace(/['"]/g, '').trim());
+  const resolve = (aliases) => {
+    for (const alias of aliases) {
+      const idx = headers.findIndex(h => h === alias || h.includes(alias));
+      if (idx !== -1) return idx;
+    }
+    return -1;
+  };
+  const idx = {};
+  for (const [key, aliases] of Object.entries(COL_MAP)) idx[key] = resolve(aliases);
+  
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const cols = parseRow(lines[i]);
+    const get = (key, fallback = "") => idx[key] !== -1 ? (cols[idx[key]] || fallback) : fallback;
+    const dur = parseFloat(get("duration", "0").replace(",", ".")) || 0;
+    rows.push({
+      id: i,
+      date: get("date", ""),
+      collaborator: get("collaborator", "—"),
+      department: get("department", "—"),
+      action: get("action", "—"),
+      duration: dur,
+      status: get("status", "—"),
+      type: get("type", "Tarefa"),
+      trainingResponsible: get("trainingResponsible") || null,
+    });
+  }
+  return rows;
+}
+
+// -------------------------------------------------------------------
+// COMPONENTES
+// -------------------------------------------------------------------
+
+// Componente Corrigido: StatusBadge
+function StatusBadge({ status }) {
+  const cfg = STATUS_CFG[status] || { bg:"rgba(100,116,139,.15)", border:"rgba(100,116,139,.3)", text:"#64748b", dot:"#64748b" };
+  return (
+    <span style={{
+      display:"inline-flex", alignItems:"center", gap:6, padding:"3px 10px",
+      borderRadius:99, fontSize:10, fontWeight:700, letterSpacing:"0.05em",
+      background: cfg.bg, border:`1px solid ${cfg.border}`, color: cfg.text
+    }}>
+      <span style={{ width:6, height:6, borderRadius:"50%", background: cfg.dot, display:"inline-block" }}></span>
+      {status}
+    </span>
+  );
+}
+
+function KpiCard({ icon, label, value, unit = "", subtext = "", accentColor = "#00d4ff" }) {
+  return (
+    <div className="fadeInUp" style={{ background: "#131528", border: `1px solid ${accentColor}22`, boxShadow: `0 4px 20px ${accentColor}05`, borderRadius: 12, padding: "20px", position: "relative" }}>
+      <div style={{ position:"absolute", top:15, right:15, fontSize:18, opacity:0.6 }}>{icon}</div>
+      <p style={{ color:"#64748b", fontSize:11, fontWeight:700, textTransform:"uppercase", marginBottom:6 }}>{label}</p>
+      <p style={{ color:"#fff", fontSize:28, fontWeight:900, lineHeight:1 }}>
+        {value} <span style={{ color:"#475569", fontSize:16, marginLeft:4 }}>{unit}</span>
+      </p>
+      {subtext && <p style={{ color:"#475569", fontSize:11, marginTop:6 }}>{subtext}</p>}
+    </div>
+  );
+}
+
+function SelectFilter({ label, options, value, onChange }) {
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+      <label style={{ fontSize:10, color:"#475569", textTransform:"uppercase", fontWeight:700 }}>{label}</label>
+      <select value={value} onChange={e => onChange(e.target.value)} style={{ background:"#1a1d36", border:"1px solid #2d3154", color:"#94a3b8", fontSize:11, padding: "8px 14px", borderRadius:8, outline:"none", cursor:"pointer", fontFamily:"inherit", minWidth: 140 }}>
+        {options.map(o => <option key={o} value={o}>{o}</option>)}
+      </select>
+    </div>
+  );
+}
+
+// -------------------------------------------------------------------
+// DASHBOARD PRINCIPAL
+// -------------------------------------------------------------------
+function TecklabDashboard() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [usingMock, setUsingMock] = useState(false);
+
+  // Filtros
+  const [fPeriod, setFPeriod] = useState("Todos");
+  const [fDept, setFDept] = useState("Geral");
+  const [fCollab, setFCollab] = useState("Todos");
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(SHEET_URL + "?t=" + Date.now());
+      if (!res.ok) throw new Error();
+      const text = await res.text();
+      const parsed = parseCSV(text);
+      if (parsed.length === 0) throw new Error();
+      setData(parsed);
+      setUsingMock(false);
+    } catch {
+      setData(MOCK_DATA);
+      setUsingMock(true);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Opções de Filtro
+  const periods = ["Todos", "Hoje", "Últimos 7 dias", "Este Mês"];
+  const depts = useMemo(() => ["Geral", ...new Set(data.map(d => d.department).filter(Boolean))], [data]);
+  const collabs = useMemo(() => ["Todos", ...new Set(data.map(d => d.collaborator).filter(Boolean))], [data]);
+
+  // Aplicação dos Filtros
+  const filtered = useMemo(() => {
+    return data.filter(a => {
+      if (fDept !== "Geral" && a.department !== fDept) return false;
+      if (fCollab !== "Todos" && a.collaborator !== fCollab) return false;
+      if (fPeriod !== "Todos" && a.date) {
+        // Conversão de data simples dd/mm/yyyy ou yyyy-mm-dd para objeto Date
+        let itemDate;
+        if (a.date.includes("/")) {
+          const parts = a.date.split("/");
+          itemDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00`);
+        } else {
+          itemDate = new Date(a.date + "T00:00:00");
+        }
         
-        let rawData = [];
-        let filteredData = [];
-        let deptChartInstance = null;
-        let timeChartInstance = null;
+        const today = new Date(); // Data atual real
+        today.setHours(0,0,0,0);
+        itemDate.setHours(0,0,0,0);
 
-        function parseCSV(text) {
-            const rows = [];
-            let row = [], cur = '', q = false;
-            for (let i = 0; i < text.length; i++) {
-                const c = text[i], n = text[i+1];
-                if (c === '"') { if (q && n === '"') { cur += '"'; i++; } else q = !q; }
-                else if (c === ',' && !q) { row.push(cur); cur = ''; }
-                else if ((c === '\n' || c === '\r') && !q) {
-                    if (c === '\r' && n === '\n') i++;
-                    row.push(cur); rows.push(row); row = []; cur = '';
-                } else cur += c;
-            }
-            if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
-            return rows;
+        if (fPeriod === "Hoje" && itemDate.getTime() !== today.getTime()) return false;
+        
+        if (fPeriod === "Últimos 7 dias") {
+          const diff = (today - itemDate) / (1000 * 60 * 60 * 24);
+          if (diff > 7 || diff < 0) return false;
         }
+        
+        if (fPeriod === "Este Mês" && (itemDate.getMonth() !== today.getMonth() || itemDate.getFullYear() !== today.getFullYear())) return false;
+      }
+      return true;
+    });
+  }, [data, fPeriod, fDept, fCollab]);
 
-        async function loadData() {
-            document.getElementById('statusBar').innerText = "Buscando dados atualizados do Sheets...";
-            try {
-                const response = await fetch(SHEET_CSV_URL + "&cb=" + Date.now());
-                const text = await response.text();
-                const rows = parseCSV(text);
-                const headers = rows[0].map(h => h.trim());
-                
-                rawData = rows.slice(1).map(r => {
-                    let obj = {};
-                    headers.forEach((h, i) => obj[h] = r[i] ? r[i].trim() : "");
-                    return obj;
-                }).filter(r => r.Colaborador);
+  // KPIs Matemáticos
+  const totalHoursFormatted = useMemo(() => {
+    const mins = filtered.reduce((acc, curr) => acc + (curr.duration * 60), 0);
+    const hrs = Math.floor(mins / 60);
+    const remMins = Math.round(mins % 60);
+    return `${String(hrs).padStart(2, '0')}:${String(remMins).padStart(2, '0')}`;
+  }, [filtered]);
 
-                populateFilters();
-                resetFiltersToGeral();
-                document.getElementById('statusBar').innerText = "Última sincronização completa: " + new Date().toLocaleTimeString();
-            } catch (e) {
-                document.getElementById('statusBar').innerText = "Falha de conexão com a planilha eletrônica.";
-                console.error(e);
-            }
-        }
+  const efficiency = useMemo(() => {
+    const done = filtered.filter(a => a.status === "Concluído").length;
+    return filtered.length ? Math.round((done / filtered.length) * 100) : 0;
+  }, [filtered]);
 
-        function populateFilters() {
-            const techs = [...new Set(rawData.map(r => r.Colaborador))].sort();
-            const techFilter = document.getElementById('techFilter');
-            techFilter.innerHTML = '<option value="">Filtrar por Técnico</option>' + techs.map(t => `<option value="${t}">${t}</option>`).join('');
-        }
+  const pendingCount = useMemo(() => filtered.filter(a => a.status === "Pendente").length, [filtered]);
+  const qualifications = useMemo(() => filtered.filter(a => a.type === "Treinamento" || a.type === "Curso").length, [filtered]);
 
-        function resetFiltersToGeral() {
-            document.getElementById('globalFilter').value = "Geral";
-            document.getElementById('techFilter').value = "";
-            filteredData = [...rawData];
-            render();
-        }
+  // Dados para Gráficos
+  const deptData = useMemo(() => {
+    const m = {};
+    filtered.forEach(a => { m[a.department] = (m[a.department] || 0) + a.duration; });
+    return Object.entries(m).map(([name, value]) => ({ name, value }));
+  }, [filtered]);
 
-        function applyGlobalFilter() {
-            document.getElementById('techFilter').value = "";
-            filteredData = [...rawData];
-            render();
-        }
+  const typeData = useMemo(() => {
+    const m = {};
+    filtered.forEach(a => { m[a.type] = (m[a.type] || 0) + a.duration; });
+    return Object.entries(m).map(([name, value]) => ({ name, value }));
+  }, [filtered]);
 
-        function applyTechFilter() {
-            const tech = document.getElementById('techFilter').value;
-            if (tech) {
-                document.getElementById('globalFilter').value = "Geral";
-                filteredData = rawData.filter(r => r.Colaborador === tech);
-            } else {
-                filteredData = [...rawData];
-            }
-            render();
-        }
+  const topInstructors = useMemo(() => {
+    const m = {};
+    data.filter(a => a.trainingResponsible).forEach(a => {
+      m[a.trainingResponsible] = (m[a.trainingResponsible] || 0) + 1;
+    });
+    return Object.entries(m)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a,b) => b.count - a.count)
+      .slice(0, 4);
+  }, [data]);
 
-        function parseDurationToMinutes(durationStr) {
-            if (!durationStr || !durationStr.includes(':')) return 0;
-            const parts = durationStr.split(':');
-            const hrs = parseInt(parts[0], 10) || 0;
-            const mins = parseInt(parts[1], 10) || 0;
-            return (hrs * 60) + mins;
-        }
+  return (
+    <div className="grid-bg" style={{ minHeight:"100vh", paddingBottom:60 }}>
+      
+      {/* HEADER E FILTROS */}
+      <header style={{ background: "#111224", borderBottom: "1px solid #1f2244", padding: "20px 0", position: "sticky", top: 0, zIndex: 100 }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 20 }}>
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 900, color: "#fff", letterSpacing: "0.05em", display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ color: "#00d4ff" }}>⚡</span> TECKNOLAB
+            </h1>
+            <p style={{ color: "#64748b", fontSize: 10, letterSpacing: "0.15em", marginTop: 2 }}>SERVIÇOS DE TESTE E MEDIÇÃO</p>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "flex-end" }}>
+            <SelectFilter label="Período" options={periods} value={fPeriod} onChange={setFPeriod} />
+            <SelectFilter label="Visão" options={depts} value={fDept} onChange={setFDept} />
+            <SelectFilter label="Filtrar por Técnico" options={collabs} value={fCollab} onChange={setFCollab} />
+            <button 
+              onClick={fetchData} disabled={loading} className="pulse-cyan"
+              style={{ background: "linear-gradient(135deg, #00d4ff22, #d946ef22)", border: "1px solid #2d3154", color: "#00d4ff", fontSize: 11, fontWeight: 700, padding: "9px 16px", borderRadius: 8, cursor: "pointer", transition: "all 0.3s" }}
+            >
+              {loading ? "Buscando..." : "Atualizar Dados"}
+            </button>
+          </div>
+        </div>
+      </header>
 
-        function formatMinutesToHours(totalMinutes) {
-            const hrs = Math.floor(totalMinutes / 60);
-            const mins = totalMinutes % 60;
-            return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
-        }
+      {/* CONTEÚDO PRINCIPAL */}
+      <main style={{ maxWidth: 1400, margin: "30px auto 0 auto", padding: "0 24px", display: "flex", flexDirection: "column", gap: 30 }}>
+        
+        {/* AVISO DE MOCK DATA */}
+        {usingMock && (
+          <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444", padding: "10px 16px", borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
+            ⚠️ AVISO: Não foi possível carregar a planilha. Exibindo dados de demonstração.
+          </div>
+        )}
 
-        function render() {
-            // 1. Cálculos de KPIs básicos
-            const totalRecords = filteredData.length;
-            const completed = filteredData.filter(r => r.Status === 'Concluído').length;
-            const pending = filteredData.filter(r => r.Status === 'Pendente' || r.Status === '').length;
-            const qualifications = filteredData.filter(r => r.Ação === 'Treinamento').length;
+        {/* CARDS TOPO */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
+          <KpiCard icon="🕒" label="TOTAL DE HORAS" value={totalHoursFormatted} subtext="Soma da duração filtrada" accentColor="#00d4ff" />
+          <KpiCard icon="📈" label="EFICIÊNCIA GERAL" value={efficiency} unit="%" subtext="Status Concluído / Total" accentColor="#d946ef" />
+          <KpiCard icon="⚠️" label="TAREFAS PENDENTES" value={pendingCount} subtext="Registros não concluídos" accentColor="#ef4444" />
+          <KpiCard icon="🎓" label="QUALIFICAÇÕES" value={qualifications} subtext="Ações de Treinamento" accentColor="#8b5cf6" />
+        </div>
 
-            let totalMinutes = 0;
-            filteredData.forEach(r => { totalMinutes += parseDurationToMinutes(r.Duração); });
+        {/* GRÁFICOS */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(500px, 1fr))", gap: 20 }}>
+          
+          {/* Carga por Depto */}
+          <div style={{ background: "#131528", border: "1px solid #1f2244", borderRadius: 12, padding: 24 }}>
+            <h3 style={{ fontSize: 12, fontWeight: 800, color: "#fff", marginBottom: 20, letterSpacing: "0.05em" }}>CARGA POR DEPARTAMENTO</h3>
+            <div style={{ width: "100%", height: 260 }}>
+              <ResponsiveContainer>
+                <BarChart data={deptData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1f2244" vertical={false} />
+                  <XAxis dataKey="name" stroke="#475569" fontSize={10} tickLine={false} />
+                  <YAxis stroke="#475569" fontSize={10} tickLine={false} />
+                  <Tooltip contentStyle={{ background:"#1c1e36", border:"1px solid #2d3154", borderRadius:6, fontSize:11, color:"#fff" }} itemStyle={{ color:"#00d4ff" }} />
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                    {deptData.map((entry, index) => <Cell key={index} fill={DEPT_COLORS[entry.name] || "#00d4ff"} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
-            document.getElementById('totalHours').innerText = formatMinutesToHours(totalMinutes);
-            document.getElementById('teamEff').innerText = totalRecords ? Math.round((completed / totalRecords) * 100) + "%" : "0%";
-            document.getElementById('activeTasks').innerText = pending;
-            document.getElementById('totalQualifications').innerText = qualifications;
-
-            // 2. Renderização das Tabelas (Geral e Individual)
-            renderTables();
-
-            // 3. Processamento e atualização de Gráficos
-            renderCharts();
-        }
-
-        function renderTables() {
-            // Tabela Principal (Visão Geral)
-            const teamHtml = `<table><thead><tr><th>Colaborador</th><th>Departamento</th><th>Ação</th><th>Data</th><th>Duração</th><th>Status</th></tr></thead><tbody>` + 
-                filteredData.slice(0, 30).map(r => `<tr>
-                    <td><b>${r.Colaborador}</b></td>
-                    <td>${r.Departamento || '-'}</td>
-                    <td>${r.Ação || '-'}</td>
-                    <td>${r.Data}</td>
-                    <td>${r.Duração || '00:00'}</td>
-                    <td><span style="color:${r.Status === 'Concluído' ? 'var(--ok)' : 'var(--danger)'}; font-weight:700;">${r.Status || 'Pendente'}</span></td>
-                </tr>`).join('') + `</tbody></table>`;
-            document.getElementById('teamTable').innerHTML = teamHtml;
-
-            // Tabela Detalhada (Visão Individual)
-            const indivHtml = `<table><thead><tr><th>Data</th><th>Departamento</th><th>Ação</th><th>Duração</th><th>Status</th><th>Análise Crítica</th></tr></thead><tbody>` + 
-                filteredData.map(r => `<tr>
-                    <td>${r.Data}</td>
-                    <td>${r.Departamento}</td>
-                    <td>${r.Ação}</td>
-                    <td>${r.Duração}</td>
-                    <td><span style="color:${r.Status === 'Concluído' ? 'var(--ok)' : 'var(--danger)'};">${r.Status || 'Pendente'}</span></td>
-                    <td>${r['Análise crítica'] || r['Análise Crítica'] || '-'}</td>
-                </tr>`).join('') + `</tbody></table>`;
-            document.getElementById('indivTable').innerHTML = indivHtml;
-        }
-
-        function renderCharts() {
-            // Agrupamento por Departamento (Gráfico de Barras)
-            const deptCounts = {};
-            filteredData.forEach(r => {
-                const d = r.Departamento || 'Não Informado';
-                deptCounts[d] = (deptCounts[d] || 0) + 1;
-            });
-
-            // Agrupamento por Tipo de Ação (Gráfico de Investimento de Tempo - Rosca)
-            const actionCounts = {};
-            filteredData.forEach(r => {
-                const a = r.Ação || 'Outros';
-                actionCounts[a] = (actionCounts[a] || 0) + 1;
-            });
-
-            // Destruir instâncias antigas para evitar sobreposição ao atualizar
-            if (deptChartInstance) deptChartInstance.destroy();
-            if (timeChartInstance) timeChartInstance.destroy();
-
-            // Gráfico 1: Departamento
-            const ctxDept = document.getElementById('deptChart').getContext('2d');
-            deptChartInstance = new Chart(ctxDept, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(deptCounts),
-                    datasets: [{
-                        label: 'Registros',
-                        data: Object.values(deptCounts),
-                        backgroundColor: '#00bcd4',
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: '#9ab2c9' } },
-                        y: { grid: { color: 'rgba(20,48,95,0.4)' }, ticks: { color: '#9ab2c9' } }
-                    }
-                }
-            });
-
-            // Gráfico 2: Investimento de Tempo (Ação)
-            const ctxTime = document.getElementById('timeChart').getContext('2d');
-            timeChartInstance = new Chart(ctxTime, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(actionCounts),
-                    datasets: [{
-                        data: Object.values(actionCounts),
-                        backgroundColor: ['#00e5ff', '#14305f', '#46f7b1', '#ff5d7a'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'right', labels: { color: '#9ab2c9', font: { size: 11 } } }
-                    }
-                }
-            });
-        }
-
-        function switchTab(tab) {
-            document.getElementById('teamTab').classList.toggle('hidden', tab !== 'team');
-            document.getElementById('indivTab').classList.toggle('hidden', tab !== 'indiv');
-            
-            document.getElementById('btnTeam').classList.toggle('active', tab === 'team');
-            document.getElementById('btnIndiv').classList.toggle('active', tab === 'indiv');
-        }
-
-        // Execução ao abrir a página
-        loadData();
-    </script>
-</body>
-</html>
+          {/* Investimento de Tempo
