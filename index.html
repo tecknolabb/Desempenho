@@ -6,11 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tecknolab · Painel Analítico</title>
 
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-  <script src="https://unpkg.com/prop-types@15/prop-types.min.js" crossorigin></script>
-  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js" crossorigin></script>
+  <script src="https://unpkg.com/prop-types@15/prop-types.min.js"></script>
+  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
 
   <script src="https://unpkg.com/@babel/standalone@7.23.9/babel.min.js"></script>
 
@@ -50,7 +50,24 @@
     </div>
   </div>
 
-<script type="text/babel">
+<script>
+  window.addEventListener('load', function() {
+    if (!window.React || !window.Recharts) {
+      document.getElementById('root').innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0b0c16;color:#ef4444;font-family:monospace;">
+          <div style="background:#131528;padding:30px;border:1px solid #ef444455;border-radius:12px;max-width:500px;">
+            <h2 style="font-size:16px;margin-bottom:10px;">⚠️ Falha de Conexão</h2>
+            <p style="font-size:12px;color:#94a3b8;line-height:1.5;">O navegador não conseguiu baixar as bibliotecas visuais (React). Verifique sua conexão com a internet ou se o seu antivírus está bloqueando scripts locais.</p>
+          </div>
+        </div>`;
+    }
+  });
+  window.addEventListener('error', function(e) {
+    console.error("Erro detectado:", e.message);
+  });
+</script>
+
+<script type="text/babel" data-presets="react">
 const { useState, useMemo, useCallback, useEffect } = React;
 const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } = Recharts;
 
@@ -129,11 +146,7 @@ function parseCSV(text) {
   return rows;
 }
 
-// -------------------------------------------------------------------
-// COMPONENTES
-// -------------------------------------------------------------------
-
-// Componente Corrigido: StatusBadge
+// COMPONENTES DA INTERFACE
 function StatusBadge({ status }) {
   const cfg = STATUS_CFG[status] || { bg:"rgba(100,116,139,.15)", border:"rgba(100,116,139,.3)", text:"#64748b", dot:"#64748b" };
   return (
@@ -172,15 +185,12 @@ function SelectFilter({ label, options, value, onChange }) {
   );
 }
 
-// -------------------------------------------------------------------
 // DASHBOARD PRINCIPAL
-// -------------------------------------------------------------------
 function TecklabDashboard() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [usingMock, setUsingMock] = useState(false);
 
-  // Filtros
   const [fPeriod, setFPeriod] = useState("Todos");
   const [fDept, setFDept] = useState("Geral");
   const [fCollab, setFCollab] = useState("Todos");
@@ -205,18 +215,15 @@ function TecklabDashboard() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Opções de Filtro
   const periods = ["Todos", "Hoje", "Últimos 7 dias", "Este Mês"];
   const depts = useMemo(() => ["Geral", ...new Set(data.map(d => d.department).filter(Boolean))], [data]);
   const collabs = useMemo(() => ["Todos", ...new Set(data.map(d => d.collaborator).filter(Boolean))], [data]);
 
-  // Aplicação dos Filtros
   const filtered = useMemo(() => {
     return data.filter(a => {
       if (fDept !== "Geral" && a.department !== fDept) return false;
       if (fCollab !== "Todos" && a.collaborator !== fCollab) return false;
       if (fPeriod !== "Todos" && a.date) {
-        // Conversão de data simples dd/mm/yyyy ou yyyy-mm-dd para objeto Date
         let itemDate;
         if (a.date.includes("/")) {
           const parts = a.date.split("/");
@@ -224,25 +231,21 @@ function TecklabDashboard() {
         } else {
           itemDate = new Date(a.date + "T00:00:00");
         }
-        
-        const today = new Date(); // Data atual real
+        const today = new Date();
         today.setHours(0,0,0,0);
         itemDate.setHours(0,0,0,0);
 
         if (fPeriod === "Hoje" && itemDate.getTime() !== today.getTime()) return false;
-        
         if (fPeriod === "Últimos 7 dias") {
           const diff = (today - itemDate) / (1000 * 60 * 60 * 24);
           if (diff > 7 || diff < 0) return false;
         }
-        
         if (fPeriod === "Este Mês" && (itemDate.getMonth() !== today.getMonth() || itemDate.getFullYear() !== today.getFullYear())) return false;
       }
       return true;
     });
   }, [data, fPeriod, fDept, fCollab]);
 
-  // KPIs Matemáticos
   const totalHoursFormatted = useMemo(() => {
     const mins = filtered.reduce((acc, curr) => acc + (curr.duration * 60), 0);
     const hrs = Math.floor(mins / 60);
@@ -258,7 +261,6 @@ function TecklabDashboard() {
   const pendingCount = useMemo(() => filtered.filter(a => a.status === "Pendente").length, [filtered]);
   const qualifications = useMemo(() => filtered.filter(a => a.type === "Treinamento" || a.type === "Curso").length, [filtered]);
 
-  // Dados para Gráficos
   const deptData = useMemo(() => {
     const m = {};
     filtered.forEach(a => { m[a.department] = (m[a.department] || 0) + a.duration; });
@@ -273,19 +275,12 @@ function TecklabDashboard() {
 
   const topInstructors = useMemo(() => {
     const m = {};
-    data.filter(a => a.trainingResponsible).forEach(a => {
-      m[a.trainingResponsible] = (m[a.trainingResponsible] || 0) + 1;
-    });
-    return Object.entries(m)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a,b) => b.count - a.count)
-      .slice(0, 4);
+    data.filter(a => a.trainingResponsible).forEach(a => { m[a.trainingResponsible] = (m[a.trainingResponsible] || 0) + 1; });
+    return Object.entries(m).map(([name, count]) => ({ name, count })).sort((a,b) => b.count - a.count).slice(0, 4);
   }, [data]);
 
   return (
     <div className="grid-bg" style={{ minHeight:"100vh", paddingBottom:60 }}>
-      
-      {/* HEADER E FILTROS */}
       <header style={{ background: "#111224", borderBottom: "1px solid #1f2244", padding: "20px 0", position: "sticky", top: 0, zIndex: 100 }}>
         <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 20 }}>
           <div>
@@ -298,27 +293,20 @@ function TecklabDashboard() {
             <SelectFilter label="Período" options={periods} value={fPeriod} onChange={setFPeriod} />
             <SelectFilter label="Visão" options={depts} value={fDept} onChange={setFDept} />
             <SelectFilter label="Filtrar por Técnico" options={collabs} value={fCollab} onChange={setFCollab} />
-            <button 
-              onClick={fetchData} disabled={loading} className="pulse-cyan"
-              style={{ background: "linear-gradient(135deg, #00d4ff22, #d946ef22)", border: "1px solid #2d3154", color: "#00d4ff", fontSize: 11, fontWeight: 700, padding: "9px 16px", borderRadius: 8, cursor: "pointer", transition: "all 0.3s" }}
-            >
+            <button onClick={fetchData} disabled={loading} className="pulse-cyan" style={{ background: "linear-gradient(135deg, #00d4ff22, #d946ef22)", border: "1px solid #2d3154", color: "#00d4ff", fontSize: 11, fontWeight: 700, padding: "9px 16px", borderRadius: 8, cursor: "pointer", transition: "all 0.3s" }}>
               {loading ? "Buscando..." : "Atualizar Dados"}
             </button>
           </div>
         </div>
       </header>
 
-      {/* CONTEÚDO PRINCIPAL */}
       <main style={{ maxWidth: 1400, margin: "30px auto 0 auto", padding: "0 24px", display: "flex", flexDirection: "column", gap: 30 }}>
-        
-        {/* AVISO DE MOCK DATA */}
         {usingMock && (
           <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444", padding: "10px 16px", borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
             ⚠️ AVISO: Não foi possível carregar a planilha. Exibindo dados de demonstração.
           </div>
         )}
 
-        {/* CARDS TOPO */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
           <KpiCard icon="🕒" label="TOTAL DE HORAS" value={totalHoursFormatted} subtext="Soma da duração filtrada" accentColor="#00d4ff" />
           <KpiCard icon="📈" label="EFICIÊNCIA GERAL" value={efficiency} unit="%" subtext="Status Concluído / Total" accentColor="#d946ef" />
@@ -326,10 +314,7 @@ function TecklabDashboard() {
           <KpiCard icon="🎓" label="QUALIFICAÇÕES" value={qualifications} subtext="Ações de Treinamento" accentColor="#8b5cf6" />
         </div>
 
-        {/* GRÁFICOS */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(500px, 1fr))", gap: 20 }}>
-          
-          {/* Carga por Depto */}
           <div style={{ background: "#131528", border: "1px solid #1f2244", borderRadius: 12, padding: 24 }}>
             <h3 style={{ fontSize: 12, fontWeight: 800, color: "#fff", marginBottom: 20, letterSpacing: "0.05em" }}>CARGA POR DEPARTAMENTO</h3>
             <div style={{ width: "100%", height: 260 }}>
@@ -347,4 +332,84 @@ function TecklabDashboard() {
             </div>
           </div>
 
-          {/* Investimento de Tempo
+          <div style={{ background: "#131528", border: "1px solid #1f2244", borderRadius: 12, padding: 24 }}>
+            <h3 style={{ fontSize: 12, fontWeight: 800, color: "#fff", marginBottom: 20, letterSpacing: "0.05em" }}>INVESTIMENTO DE TEMPO</h3>
+            <div style={{ width: "100%", height: 260, display: "flex", alignItems: "center" }}>
+              <div style={{ width: "60%", height: "100%" }}>
+                <ResponsiveContainer>
+                  <PieChart>
+                    <Pie data={typeData} innerRadius={65} outerRadius={85} paddingAngle={5} dataKey="value">
+                      {typeData.map((entry, index) => <Cell key={index} fill={TYPE_COLORS[entry.name] || "#00d4ff"} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ background:"#1c1e36", border:"1px solid #2d3154", borderRadius:6, fontSize:11, color:"#fff" }} itemStyle={{ color:"#00d4ff" }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div style={{ width: "40%", display: "flex", flexDirection: "column", gap: 12 }}>
+                {typeData.map((entry, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: TYPE_COLORS[entry.name] }}></div>
+                    <div>
+                      <p style={{ fontSize: 11, color: "#fff", fontWeight: 700 }}>{entry.name}</p>
+                      <p style={{ fontSize: 10, color: "#64748b" }}>{entry.value} Horas</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ background: "#131528", border: "1px solid #1f2244", borderRadius: 12, padding: 24 }}>
+          <h3 style={{ fontSize: 12, fontWeight: 800, color: "#fff", marginBottom: 16, letterSpacing: "0.05em" }}>🏆 TOP 4 INSTRUTORES</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
+            {topInstructors.length > 0 ? topInstructors.map((ins, idx) => {
+              const colors = ["#00d4ff", "#d946ef", "#8b5cf6", "#3b82f6"];
+              return (
+                <div key={idx} style={{ background: "#1a1d36", borderRadius: 10, padding: 16, borderLeft: `4px solid ${colors[idx]}` }}>
+                  <p style={{ fontSize: 12, fontWeight: 800, color: "#fff" }}>{idx+1}º {ins.name}</p>
+                  <p style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>Ações aplicadas: <span style={{ color: colors[idx], fontWeight: 800 }}>{ins.count}</span></p>
+                </div>
+              );
+            }) : <p style={{ fontSize:11, color:"#475569" }}>Nenhum dado computado.</p>}
+          </div>
+        </div>
+
+        <div style={{ background: "#131528", border: "1px solid #1f2244", borderRadius: 12, overflow: "hidden" }}>
+          <div style={{ padding: "20px 24px", borderBottom: "1px solid #1f2244" }}>
+            <h3 style={{ fontSize: 12, fontWeight: 800, color: "#fff", letterSpacing: "0.05em" }}>ÚLTIMOS GARGALOS</h3>
+          </div>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 11 }}>
+              <thead style={{ background: "#1a1d36", color: "#64748b" }}>
+                <tr>
+                  {["DATA", "COLABORADOR", "DEPARTAMENTO", "AÇÃO", "DURAÇÃO", "STATUS"].map(h => (
+                    <th key={h} style={{ padding: "14px 20px", fontWeight: 700 }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((row, i) => (
+                  <tr key={i} style={{ borderBottom: "1px solid #1f2244", background: i % 2 === 0 ? "transparent" : "#16182e" }}>
+                    <td style={{ padding: "14px 20px", color: "#94a3b8" }}>{row.date}</td>
+                    <td style={{ padding: "14px 20px", fontWeight: 700, color: "#fff" }}>{row.collaborator}</td>
+                    <td style={{ padding: "14px 20px", color: DEPT_COLORS[row.department] || "#fff" }}>{row.department}</td>
+                    <td style={{ padding: "14px 20px", color: "#cbd5e1", maxWidth: 300, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={row.action}>{row.action}</td>
+                    <td style={{ padding: "14px 20px", fontWeight: 700, color: "#fff" }}>{row.duration}h</td>
+                    <td style={{ padding: "14px 20px" }}><StatusBadge status={row.status} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<TecklabDashboard />);
+</script>
+</body>
+</html>
